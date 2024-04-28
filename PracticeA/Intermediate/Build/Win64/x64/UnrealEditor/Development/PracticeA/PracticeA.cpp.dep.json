@@ -1,0 +1,14 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\practicea\\practicea\\source\\practicea\\practicea.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\practicea\\practicea\\intermediate\\build\\win64\\x64\\practiceaeditor\\development\\engine\\sharedpch.engine.cpp20.h.pch",
+        "Includes": [
+            "d:\\practicea\\practicea\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\practicea\\definitions.practicea.h",
+            "d:\\practicea\\practicea\\source\\practicea\\practicea.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
