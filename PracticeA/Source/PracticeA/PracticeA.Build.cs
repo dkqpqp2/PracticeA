@@ -7,7 +7,9 @@ public class PracticeA : ModuleRules
 	public PracticeA(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
+
+		PublicIncludePaths.AddRange(new string[] { "PracticeA" });
+
 		PublicDependencyModuleNames.AddRange(new string[] { "Core",
 			"CoreUObject",
 			"Engine", 
