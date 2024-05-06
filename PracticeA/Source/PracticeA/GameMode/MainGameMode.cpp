@@ -17,6 +17,5 @@ AMainGameMode::AMainGameMode()
 	{
 		PlayerControllerClass = PlayerControllerClassRef.Class;
 	}
-	
 
 }
