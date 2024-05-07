@@ -58,11 +58,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AttackAction;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Characeter)
+	bool bIsCrouching;
 	
 	void ShoulderMove(const FInputActionValue& Value);
 	void ShoulderLook(const FInputActionValue& Value);
 	void QuaterMove(const FInputActionValue& Value);
-	void Crouh(const FInputActionValue& Value);
+	void OnCrouh(const FInputActionValue& Value);
+	void OnUnCrouh(const FInputActionValue& Value);
+	
 
 	void Attack();
 

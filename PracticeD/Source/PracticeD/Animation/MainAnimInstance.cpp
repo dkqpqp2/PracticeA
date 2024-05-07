@@ -8,7 +8,6 @@
 UMainAnimInstance::UMainAnimInstance()
 {
 	MovingThreshould = 3.0f;
-	CrouchingThreshould = 1.0f;
 	JumpingThreshould = 100.0f;
 
 }
@@ -36,5 +35,6 @@ void UMainAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsIdle = GroundSpeed < MovingThreshould;
 		bIsFalling = Movement->IsFalling();
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshould);
+		bIsCrouching = Movement->IsCrouching();
 	}
 }

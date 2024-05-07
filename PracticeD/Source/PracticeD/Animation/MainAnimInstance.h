@@ -48,9 +48,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
 	float JumpingThreshould;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Characeter)
-	uint8 bIsCrouching : 1;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Character)
-	float CrouchingThreshould;
+	uint8 bIsCrouching : 1;
 };

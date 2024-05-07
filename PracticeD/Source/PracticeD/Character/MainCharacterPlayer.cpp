@@ -52,6 +52,12 @@ AMainCharacterPlayer::AMainCharacterPlayer()
 		QuaterMoveAction = InputActionQuaterMoveRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionCrouchRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PracticeContents/Player/Input/Actions/IA_Crouch.IA_Crouch'"));
+	if (nullptr != InputActionCrouchRef.Object)
+	{
+		CrouchAction = InputActionCrouchRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAttackRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PracticeContents/Player/Input/Actions/IA_Attack.IA_Attack'"));
 	if (nullptr != InputActionAttackRef.Object)
 	{
@@ -59,6 +65,7 @@ AMainCharacterPlayer::AMainCharacterPlayer()
 	}
 
 	CurrentCharacterControlType = ECharacterControlType::Shoulder;
+	bIsCrouching = false;
 }
 
 void AMainCharacterPlayer::BeginPlay()
@@ -77,11 +84,12 @@ void AMainCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Play
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(ChangeControlAction, ETriggerEvent::Completed, this, &AMainCharacterPlayer::ChangeCharacterControl);
-	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AMainCharacterPlayer::Crouh);
+	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AMainCharacterPlayer::OnCrouh);
+	EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AMainCharacterPlayer::OnUnCrouh);
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &AMainCharacterPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &AMainCharacterPlayer::ShoulderLook);
 	EnhancedInputComponent->BindAction(QuaterMoveAction, ETriggerEvent::Triggered, this, &AMainCharacterPlayer::QuaterMove);
-	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &AMainCharacterPlayer::Attack);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AMainCharacterPlayer::Attack);
 
 }
 
@@ -179,9 +187,14 @@ void AMainCharacterPlayer::QuaterMove(const FInputActionValue& Value)
 	AddMovementInput(MoveDirection, MovementVectorSize);
 }
 
-void AMainCharacterPlayer::Crouh(const FInputActionValue& Value)
+void AMainCharacterPlayer::OnCrouh(const FInputActionValue& Value)
 {
-	
+	Crouch(false);
+}
+
+void AMainCharacterPlayer::OnUnCrouh(const FInputActionValue& Value)
+{
+	UnCrouch(false);
 }
 
 void AMainCharacterPlayer::Attack()

@@ -24,6 +24,7 @@ AMainCharacterBase::AMainCharacterBase()
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -69,5 +70,5 @@ void AMainCharacterBase::ProcessComboCommand()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-	AnimInstance->Montage_Play(ComboActionMontage, 1.0f);
+	AnimInstance->Montage_Play(ComboActionMontage);
 }
