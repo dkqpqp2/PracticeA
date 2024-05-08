@@ -13,6 +13,7 @@ enum class ECharacterControlType : uint8
 	Quater
 };
 
+
 UCLASS()
 class PRACTICED_API AMainCharacterBase : public ACharacter
 {
@@ -21,6 +22,8 @@ class PRACTICED_API AMainCharacterBase : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMainCharacterBase();
+
+
 
 protected:
 	virtual void SetCharacterControlData(const class UMainCharacterControlData* CharacterControlData);
@@ -40,7 +43,7 @@ protected:
 
 	void ComboActionBegin();
 	void ComboActionEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded);
-	void SetComboCheckTimer();
+	void SetComboCheckTimer(); 
 	void ComboCheck();
 
 	int32 CurrentCombo = 0;

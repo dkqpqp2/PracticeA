@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "MainCharacterControlData.h"
+#include "Components/ArrowComponent.h"
 
 AMainCharacterPlayer::AMainCharacterPlayer()
 {
@@ -26,6 +27,17 @@ AMainCharacterPlayer::AMainCharacterPlayer()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 	
+#if WITH_EDITORONLY_DATA
+	FName LHandSocket(TEXT("LeftHand_Socket"));
+	FName RHandSocket(TEXT("RightHand_Socket"));
+	LArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("LArrow"));
+	LArrow->SetupAttachment(GetMesh(), LHandSocket);
+	LArrow->SetRelativeRotation(FRotator(0.0, -90.0, 0.0));
+
+	RArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("RArrow"));
+	RArrow->SetupAttachment(GetMesh(), RHandSocket);
+	RArrow->SetRelativeRotation(FRotator(0.0, -90.0, 0.0));
+#endif
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/PracticeContents/Player/Input/Actions/IA_Jump.IA_Jump'"));
 	if (nullptr != InputActionJumpRef.Object)
@@ -204,6 +216,8 @@ void AMainCharacterPlayer::OnUnCrouh(const FInputActionValue& Value)
 
 void AMainCharacterPlayer::Attack()
 {
+
+
 	ProcessComboCommand();
 }
 

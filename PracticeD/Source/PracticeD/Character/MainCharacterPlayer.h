@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "MainCharacterPlayer.generated.h"
 
+class UArrowComponent;
 /**
  * 
  */
@@ -17,6 +18,15 @@ class PRACTICED_API AMainCharacterPlayer : public AMainCharacterBase
 
 public:
 	AMainCharacterPlayer();
+
+#if WITH_EDITORONLY_DATA
+
+protected:
+	UPROPERTY()
+	TObjectPtr<UArrowComponent> LArrow;
+	TObjectPtr<UArrowComponent> RArrow;
+
+#endif
 
 protected:
 	virtual void BeginPlay() override;
