@@ -120,6 +120,7 @@ void AMainCharacterBase::SetComboCheckTimer()
 	if (ComboEffectiveTime > 0.0f)
 	{
 		GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &AMainCharacterBase::ComboCheck, ComboEffectiveTime, false);
+		AnimNotify_AttackStart();
 	}
 
 }
@@ -132,9 +133,104 @@ void AMainCharacterBase::ComboCheck()
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 		CurrentCombo = FMath::Clamp(CurrentCombo + 1, 1, ComboActionData->MaxComboCount);
+
 		FName NextSection = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, CurrentCombo);
 		AnimInstance->Montage_JumpToSection(NextSection, ComboActionMontage);
 		SetComboCheckTimer();
 		HasNextComboCommand = false;
 	}
+}
+void AMainCharacterBase::StatrAttackTrace()
+{
+	SetAttackTimer();
+}
+
+void AMainCharacterBase::EndAttackTrace()
+{
+	GetWorld()->GetTimerManager().ClearTimer(AttackTimer);
+}
+
+void AMainCharacterBase::SetAttackTimer()
+{
+	float Interval = 1.0f;
+
+	GetWorld()->GetTimerManager().SetTimer(AttackTimer, this, &AMainCharacterBase::AttackTrace, Interval, false);
+	AttackTrace();
+}
+
+void AMainCharacterBase::AttackTrace()
+{
+	AttackTimer.Invalidate();
+
+}
+
+
+void AMainCharacterBase::AnimNotify_AttackStart()
+{
+	StatrAttackTrace(); 
+
+	FVector LStartLocation = GetMesh()->GetSocketLocation("LeftHand_Socket");
+	FVector RStartLocation = GetMesh()->GetSocketLocation("RightHand_Socket");
+	FVector LEndLocation = LStartLocation + FVector(0.0, 0.0, -20.0);
+	FVector REndLocation = RStartLocation + FVector(0.0, 0.0, -20.0);
+	FCollisionQueryParams Params(NAME_None, false);
+
+	FHitResult HitResult;
+
+	bool bLHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		LStartLocation,
+		LEndLocation,
+		FQuat::Identity,
+		ECC_GameTraceChannel1,
+		FCollisionShape::MakeCapsule(10.0f, 20.0f),
+		Params
+	);
+
+	bool bRHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		RStartLocation,
+		REndLocation,
+		FQuat::Identity,
+		ECC_GameTraceChannel1,
+		FCollisionShape::MakeCapsule(10.0f, 20.0f),
+		Params
+	);
+
+	if (bLHit || bRHit)
+	{
+		// 충돌 감지
+	}
+
+	DrawDebugCapsule(
+		GetWorld(),
+		LStartLocation,
+		20.0f,
+		10.0f,
+		FQuat::Identity,
+		bLHit ? FColor::Green : FColor::Red,
+		false,
+		5.0f,
+		0,
+		2.0f
+
+	);
+
+	DrawDebugCapsule(
+		GetWorld(),
+		RStartLocation,
+		20.0f,
+		10.0f,
+		FQuat::Identity,
+		bRHit ? FColor::Green : FColor::Red,
+		false,
+		5.0f,
+		0,
+		2.0f
+	);
+}
+
+void AMainCharacterBase::AnimNotify_AttackEnd()
+{
+	EndAttackTrace();
 }

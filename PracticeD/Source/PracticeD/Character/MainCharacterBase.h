@@ -46,6 +46,15 @@ protected:
 	void SetComboCheckTimer(); 
 	void ComboCheck();
 
+	void StatrAttackTrace();
+	void EndAttackTrace();
+	void SetAttackTimer();
+	void AttackTrace();
+	void AnimNotify_AttackStart();
+	void AnimNotify_AttackEnd();
+
+	FTimerHandle AttackTimer;
+
 	int32 CurrentCombo = 0;
 	FTimerHandle ComboTimerHandle;
 	bool HasNextComboCommand = false;

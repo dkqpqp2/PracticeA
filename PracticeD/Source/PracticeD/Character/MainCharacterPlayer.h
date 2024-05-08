@@ -77,7 +77,7 @@ protected:
 	void OnCrouh(const FInputActionValue& Value);
 	void OnUnCrouh(const FInputActionValue& Value);
 	
-
+	
 	void Attack();
 
 
