@@ -88,11 +88,13 @@ AMainCharacterPlayer::AMainCharacterPlayer()
 	LSphere = CreateDefaultSubobject<USphereComponent>(TEXT("LHandSphere"));
 	LSphere->SetupAttachment(GetMesh(), LHandSocket);
 	LSphere->SetRelativeLocationAndRotation(FVector(0.0, -5.0, 0.0), FRotator(0.0, -90.0, 0.0));
+	LSphere->SetCollisionProfileName("PlayerAttack");
 	LSphere->SetSphereRadius(10.0f);
 
 	RSphere = CreateDefaultSubobject<USphereComponent>(TEXT("RHandSphere"));
 	RSphere->SetupAttachment(GetMesh(), RHandSocket);
 	RSphere->SetRelativeLocationAndRotation(FVector(0.0, -5.0, 0.0), FRotator(0.0, -90.0, 0.0));
+	RSphere->SetCollisionProfileName("PlayerAttack");
 	RSphere->SetSphereRadius(10.0f);
 	
 }
@@ -102,6 +104,10 @@ void AMainCharacterPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	SetCharacterControl(CurrentCharacterControlType);
+
+	LSphere->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacterPlayer::OnLeftAndRightHandOverlap);
+	RSphere->OnComponentBeginOverlap.AddDynamic(this, &AMainCharacterPlayer::OnLeftAndRightHandOverlap);
+
 	LSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	LSphere->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 	RSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -131,6 +137,8 @@ void AMainCharacterPlayer::ActivateCollision()
 {
 	LSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	RSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	DrawDebugSphere(GetWorld(), GetMesh()->GetSocketLocation("LeftHand_Socket"), 10.0f, 5, FColor::Red, false, 5.0f);
+	DrawDebugSphere(GetWorld(), GetMesh()->GetSocketLocation("RightHand_Socket"), 10.0f, 5, FColor::Red, false, 5.0f);
 }
 
 void AMainCharacterPlayer::DeactivateCollision()

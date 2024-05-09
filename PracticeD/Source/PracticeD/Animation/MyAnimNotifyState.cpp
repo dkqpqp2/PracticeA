@@ -17,7 +17,7 @@ void UMyAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequ
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("ShpereCollision Activate"));
 			Character->ActivateCollision();
-			DrawDebugSphere(GetWorld(), Character->GetMesh()->GetSocketLocation("LeftHand_Socket"), 20.0f, 5, FColor::Red, false, 5.f, 0, 1.f);
+			
 		}
 
 	}
@@ -36,6 +36,7 @@ void UMyAnimNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequen
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("ShpereCollision Deactivate"));
 			Character->DeactivateCollision();
+
 		}
 
 	}
