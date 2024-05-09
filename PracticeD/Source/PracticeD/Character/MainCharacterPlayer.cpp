@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "MainCharacterControlData.h"
 #include "Components/ArrowComponent.h"
+#include "Components/SphereComponent.h"
 
 AMainCharacterPlayer::AMainCharacterPlayer()
 {
@@ -83,6 +84,17 @@ AMainCharacterPlayer::AMainCharacterPlayer()
 
 	CurrentCharacterControlType = ECharacterControlType::Shoulder;
 	bIsCrouching = false;
+
+	LSphere = CreateDefaultSubobject<USphereComponent>(TEXT("LHandSphere"));
+	LSphere->SetupAttachment(GetMesh(), LHandSocket);
+	LSphere->SetRelativeLocationAndRotation(FVector(0.0, -5.0, 0.0), FRotator(0.0, -90.0, 0.0));
+	LSphere->SetSphereRadius(10.0f);
+
+	RSphere = CreateDefaultSubobject<USphereComponent>(TEXT("RHandSphere"));
+	RSphere->SetupAttachment(GetMesh(), RHandSocket);
+	RSphere->SetRelativeLocationAndRotation(FVector(0.0, -5.0, 0.0), FRotator(0.0, -90.0, 0.0));
+	RSphere->SetSphereRadius(10.0f);
+	
 }
 
 void AMainCharacterPlayer::BeginPlay()
@@ -90,6 +102,11 @@ void AMainCharacterPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	SetCharacterControl(CurrentCharacterControlType);
+	LSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	LSphere->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
+	RSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RSphere->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
+
 }
 
 void AMainCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -108,6 +125,18 @@ void AMainCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Play
 	EnhancedInputComponent->BindAction(QuaterMoveAction, ETriggerEvent::Triggered, this, &AMainCharacterPlayer::QuaterMove);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AMainCharacterPlayer::Attack);
 
+}
+
+void AMainCharacterPlayer::ActivateCollision()
+{
+	LSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	RSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void AMainCharacterPlayer::DeactivateCollision()
+{
+	LSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AMainCharacterPlayer::ChangeCharacterControl()
@@ -217,6 +246,13 @@ void AMainCharacterPlayer::OnUnCrouh(const FInputActionValue& Value)
 void AMainCharacterPlayer::Attack()
 {
 	ProcessComboCommand();
+}
+
+void AMainCharacterPlayer::OnLeftAndRightHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Overlap And Damage"));
+
 }
 
 

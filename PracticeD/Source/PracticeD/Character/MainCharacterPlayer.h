@@ -19,6 +19,13 @@ class PRACTICED_API AMainCharacterPlayer : public AMainCharacterBase
 public:
 	AMainCharacterPlayer();
 
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USphereComponent> LSphere;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USphereComponent> RSphere;
+
 #if WITH_EDITORONLY_DATA
 
 protected:
@@ -33,6 +40,9 @@ protected:
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void ActivateCollision();
+	void DeactivateCollision();
 
 protected:
 	void ChangeCharacterControl();
@@ -79,7 +89,15 @@ protected:
 	
 	
 	void Attack();
-
+	UFUNCTION()
+	void OnLeftAndRightHandOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
 
 	ECharacterControlType CurrentCharacterControlType;
 };
