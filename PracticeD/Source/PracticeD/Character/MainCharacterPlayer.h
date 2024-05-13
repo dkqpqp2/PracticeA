@@ -43,6 +43,8 @@ public:
 
 	void ActivateCollision();
 	void DeactivateCollision();
+	void RightActivateCollision();
+	void RightDeactivateCollision();
 
 protected:
 	void ChangeCharacterControl();

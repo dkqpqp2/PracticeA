@@ -10,6 +10,7 @@
 #include "MainCharacterControlData.h"
 #include "Components/ArrowComponent.h"
 #include "Components/SphereComponent.h"
+#include "Engine/DamageEvents.h"
 
 AMainCharacterPlayer::AMainCharacterPlayer()
 {
@@ -136,14 +137,23 @@ void AMainCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Play
 void AMainCharacterPlayer::ActivateCollision()
 {
 	LSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	RSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	DrawDebugSphere(GetWorld(), GetMesh()->GetSocketLocation("LeftHand_Socket"), 10.0f, 5, FColor::Red, false, 5.0f);
-	DrawDebugSphere(GetWorld(), GetMesh()->GetSocketLocation("RightHand_Socket"), 10.0f, 5, FColor::Red, false, 5.0f);
+	DrawDebugSphere(GetWorld(), GetMesh()->GetSocketLocation("LeftHand_Socket"), 10.0f, 15, FColor::Red, false, 5.0f);
 }
 
 void AMainCharacterPlayer::DeactivateCollision()
 {
 	LSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+}
+
+void AMainCharacterPlayer::RightActivateCollision()
+{
+	RSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	DrawDebugSphere(GetWorld(), GetMesh()->GetSocketLocation("RightHand_Socket"), 10.0f, 15, FColor::Red, false, 5.0f);
+}
+
+void AMainCharacterPlayer::RightDeactivateCollision()
+{
 	RSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -259,8 +269,15 @@ void AMainCharacterPlayer::Attack()
 void AMainCharacterPlayer::OnLeftAndRightHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Overlap And Damage"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap And Damage"));
 
+	// OtherActor가 맞은 액터
+	FDamageEvent DamageEvent;
+	float DamageAmount = 10.0f;
+
+	OtherActor->TakeDamage(DamageAmount, DamageEvent, GetController(), this);
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Damage Taken: %.1f"), DamageAmount));
 }
 
 
