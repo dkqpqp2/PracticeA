@@ -4,10 +4,13 @@
 #include "OBotCharacterPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "OBotControlData.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 
 
 AOBotCharacterPlayer::AOBotCharacterPlayer()
@@ -21,6 +24,24 @@ AOBotCharacterPlayer::AOBotCharacterPlayer()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	Jetpack = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Jetpack"));
+	Jetpack->SetupAttachment(GetMesh(), FName("BackpackSocket"));
+
+	NiagaraEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraEffect"));
+	NiagaraEffect->SetupAttachment(Jetpack);
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> JetpackMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/StackOBot/Characters/Backpack/Mesh/SKM_Backpack.SKM_Backpack'"));
+	if (JetpackMeshRef.Object)
+	{
+		Jetpack->SetSkeletalMesh(JetpackMeshRef.Object);
+	}
+	
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/StackOBot/FX/JetpackThruster/FX_JetpackThruster.FX_JetpackThruster'"));
+	if (NiagaraRef.Object)
+	{
+		NiagaraActivationEffect = NiagaraRef.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Jump.IA_Jump'"));
 	if (nullptr != InputActionJumpRef.Object)
@@ -51,15 +72,25 @@ AOBotCharacterPlayer::AOBotCharacterPlayer()
 	}
 
 	CurrentCharacterControlType = ECharacterControlType::Shoulder;
-
+	bIsJetpackActive = false;
 }
 
 void AOBotCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		EnableInput(PlayerController);
+	}
 	SetCharacterControl(CurrentCharacterControlType);
 	
+}
+
+void AOBotCharacterPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
 }
 
 void AOBotCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -68,8 +99,9 @@ void AOBotCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AOBotCharacterPlayer::StartJump);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AOBotCharacterPlayer::Jump);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AOBotCharacterPlayer::StopJumping);
 	EnhancedInputComponent->BindAction(ChangeControlAction, ETriggerEvent::Triggered, this, &AOBotCharacterPlayer::ChangeCharacterControl);
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &AOBotCharacterPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &AOBotCharacterPlayer::ShoulderLook);
@@ -77,6 +109,49 @@ void AOBotCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	
 }
+
+bool AOBotCharacterPlayer::IsHovering() const
+{
+	return bIsHovering;
+}
+
+void AOBotCharacterPlayer::ServerStartHover_Implementation()
+{
+	//Server에서 StartHover 상태를 모든 플레이어에게 전파
+	MulticastStartHover();
+}
+
+void AOBotCharacterPlayer::MulticastStartHover_Implementation()
+{
+	//모든 플레이어는 특정 캐릭터의 Hover 상태를 알고, Effect 재생
+	NiagaraEffect->SetAsset(NiagaraActivationEffect);
+	NiagaraEffect->Activate();
+	bIsHovering = true;
+	GetCharacterMovement()->AirControl = 5.f;
+}
+
+void AOBotCharacterPlayer::ServerLaunchCharacter_Implementation()
+{
+	MulticastLaunchCharacter();
+}
+void AOBotCharacterPlayer::MulticastLaunchCharacter_Implementation()
+{
+	LaunchCharacter(FVector(0.f, 0.f, 1.f), false, true);
+}
+
+void AOBotCharacterPlayer::ServerStopHover_Implementation()
+{
+	//Hover 상태가 종료된 상태를 모든 플레이어에게 전파
+	MulticastStopHover();
+}
+void AOBotCharacterPlayer::MulticastStopHover_Implementation()
+{
+	NiagaraEffect->Deactivate();
+	bIsHovering = false;
+	GetCharacterMovement()->AirControl = 1.f;
+}
+
+
 
 void AOBotCharacterPlayer::ChangeCharacterControl()
 {
@@ -97,6 +172,11 @@ void AOBotCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacte
 	check(NewCharacterControl);
 
 	SetCharacterControlData(NewCharacterControl);
+
+	if (GetController() == nullptr)
+	{
+		return;
+	}
 
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -170,4 +250,54 @@ void AOBotCharacterPlayer::QuaterMove(const FInputActionValue& Value)
 	GetController()->SetControlRotation(FRotationMatrix::MakeFromX(MoveDirection).Rotator());
 	AddMovementInput(MoveDirection, MovementVectorSize);
 
+}
+
+void AOBotCharacterPlayer::StartJump()
+{
+	if (GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking)
+	{
+		bIsJetpackActive = false;
+	}
+
+	if (bIsJetpackActive)
+	{
+		ServerStartHover();
+		//bIsHovering = true;
+		//GetCharacterMovement()->AirControl = 5.f;
+	}
+	bIsJetpackActive = true;
+}
+
+void AOBotCharacterPlayer::Jump()
+{
+	Super::Jump();
+
+	if (bIsHovering)
+	{
+		ServerLaunchCharacter();
+	}
+}
+
+void AOBotCharacterPlayer::StopJumping()
+{
+	Super::StopJumping();
+
+	if (bIsJetpackActive)
+	{
+		ServerStopHover();
+	}
+}
+
+void AOBotCharacterPlayer::ActivateJetPack()
+{
+	bIsJetpackActive = true;
+	NiagaraEffect->Activate();
+
+}
+
+void AOBotCharacterPlayer::DeactivateJetPack()
+{
+	bIsJetpackActive = false;
+
+	NiagaraEffect->Deactivate();
 }

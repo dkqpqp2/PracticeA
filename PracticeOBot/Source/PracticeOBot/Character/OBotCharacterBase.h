@@ -28,5 +28,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UOBotControlData*> CharacterControlManager;
-
 };

@@ -28,6 +28,7 @@ AOBotCharacterBase::AOBotCharacterBase()
     GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
     GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
 
+
     static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/StackOBot/Characters/Bot/Mesh/SKM_Bot.SKM_Bot'"));
     if (CharacterMeshRef.Object)
     {
@@ -59,9 +60,12 @@ void AOBotCharacterBase::SetCharacterControlData(const UOBotControlData* Charact
 {
     bUseControllerRotationYaw = CharacterControlData->bUseControllerRotationYaw;
 
-    GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
-    GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
-    GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
+        GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
+        GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
+    }
 }
 
 

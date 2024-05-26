@@ -20,11 +20,30 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	bool IsHovering() const;
+	UFUNCTION(Server, Unreliable)
+	void ServerStartHover();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastStartHover();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerLaunchCharacter();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastLaunchCharacter();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerStopHover();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastStopHover();
 protected:
 	void ChangeCharacterControl();
 	void SetCharacterControl(ECharacterControlType NewCharacterControlType);
@@ -36,6 +55,15 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
+	TObjectPtr<class USkeletalMeshComponent> Jetpack;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Niagara)
+	TObjectPtr<class UNiagaraComponent> NiagaraEffect;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Niagara)
+	TObjectPtr<class UNiagaraSystem> NiagaraActivationEffect;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
@@ -58,4 +86,17 @@ protected:
 	void QuaterMove(const FInputActionValue& Value);
 
 	ECharacterControlType CurrentCharacterControlType;
+
+	void StartJump();
+	virtual void Jump() override;
+	virtual void StopJumping() override;
+	void ActivateJetPack();
+	void DeactivateJetPack();
+
+private:
+	bool bIsJetpackActive;
+	bool bIsHovering;
+	FVector HoveringOriginLocation = FVector::ZeroVector;
+
+	FTimerHandle FlightTimerHandle;
 };

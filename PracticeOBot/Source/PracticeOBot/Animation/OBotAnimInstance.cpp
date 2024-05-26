@@ -2,6 +2,7 @@
 
 
 #include "OBotAnimInstance.h"
+#include "Character/OBotCharacterPlayer.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -16,12 +17,11 @@ void UOBotAnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	// AnimInstance를 사용하는 Actor를 가져올수잇음
-	Owner = Cast<ACharacter>(GetOwningActor());
+	Owner = Cast<AOBotCharacterPlayer>(GetOwningActor());
 	if (Owner)
 	{
 		Movement = Owner->GetCharacterMovement();
 	}
-	EMovementMode
 }
 
 void UOBotAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -35,6 +35,6 @@ void UOBotAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsIdle = GroundSpeed < MovingThreshould;
 		bIsFalling = Movement->IsFalling();
 		bIsJumping = bIsFalling & (Velocity.Z > JumpingThreshould);
-		bIsHovering = 
+		bIsHovering = Owner->IsHovering();
 	}
 }

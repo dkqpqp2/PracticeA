@@ -15,8 +15,9 @@ public class PracticeOBot : ModuleRules
 			"CoreUObject",
 			"Engine", 
 			"InputCore",
-			"EnhancedInput"
-		});
+			"EnhancedInput",
+            "Niagara"
+        });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
