@@ -288,16 +288,3 @@ void AOBotCharacterPlayer::StopJumping()
 	}
 }
 
-void AOBotCharacterPlayer::ActivateJetPack()
-{
-	bIsJetpackActive = true;
-	NiagaraEffect->Activate();
-
-}
-
-void AOBotCharacterPlayer::DeactivateJetPack()
-{
-	bIsJetpackActive = false;
-
-	NiagaraEffect->Deactivate();
-}

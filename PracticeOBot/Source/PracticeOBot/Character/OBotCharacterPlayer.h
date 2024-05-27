@@ -90,8 +90,7 @@ protected:
 	void StartJump();
 	virtual void Jump() override;
 	virtual void StopJumping() override;
-	void ActivateJetPack();
-	void DeactivateJetPack();
+
 
 private:
 	bool bIsJetpackActive;
