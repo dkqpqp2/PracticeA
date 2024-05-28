@@ -11,6 +11,7 @@
 #include "OBotControlData.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "Animation/AnimMontage.h"
 
 
 AOBotCharacterPlayer::AOBotCharacterPlayer()
@@ -70,6 +71,11 @@ AOBotCharacterPlayer::AOBotCharacterPlayer()
 	{
 		QuaterMoveAction = InputActionQuaterMoveRef.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAttackRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Attack.IA_Attack'"));
+	if (nullptr != InputActionAttackRef.Object)
+	{
+		AttackAction = InputActionAttackRef.Object;
+	}
 
 	CurrentCharacterControlType = ECharacterControlType::Shoulder;
 	bIsJetpackActive = false;
@@ -106,6 +112,7 @@ void AOBotCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	EnhancedInputComponent->BindAction(ShoulderMoveAction, ETriggerEvent::Triggered, this, &AOBotCharacterPlayer::ShoulderMove);
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &AOBotCharacterPlayer::ShoulderLook);
 	EnhancedInputComponent->BindAction(QuaterMoveAction, ETriggerEvent::Triggered, this, &AOBotCharacterPlayer::QuaterMove);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AOBotCharacterPlayer::Attack);
 
 	
 }
@@ -286,5 +293,11 @@ void AOBotCharacterPlayer::StopJumping()
 	{
 		ServerStopHover();
 	}
+}
+
+void AOBotCharacterPlayer::Attack()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->Montage_Play(AttackMontage);
 }
 

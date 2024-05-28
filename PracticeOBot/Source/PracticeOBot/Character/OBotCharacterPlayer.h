@@ -3,6 +3,7 @@
 #pragma once
 
 #include "OBotCharacterBase.h"
+#include "Projectile/PlayerProjectile.h"
 #include "OBotCharacterPlayer.generated.h"
 
 struct FInputActionValue;
@@ -81,6 +82,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> QuaterMoveAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> AttackAction;
+
 	void ShoulderMove(const FInputActionValue& Value);
 	void ShoulderLook(const FInputActionValue& Value);
 	void QuaterMove(const FInputActionValue& Value);
@@ -91,11 +95,19 @@ protected:
 	virtual void Jump() override;
 	virtual void StopJumping() override;
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> AttackMontage;
+
+	void Attack();
+
 
 private:
 	bool bIsJetpackActive;
 	bool bIsHovering;
 	FVector HoveringOriginLocation = FVector::ZeroVector;
 
-	FTimerHandle FlightTimerHandle;
+public:
+	UPROPERTY(EditAnywhere, Category = Projectile)
+	TSubclassOf<APlayerProjectile> ProjectileClass;
 };

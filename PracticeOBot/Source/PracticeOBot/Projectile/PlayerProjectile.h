@@ -14,6 +14,8 @@ class PRACTICEOBOT_API APlayerProjectile : public AActor
 public:	
 	APlayerProjectile();
 
+	virtual void BeginPlay() override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Trigger)
 	TObjectPtr<class USphereComponent> SphereTrigger;
